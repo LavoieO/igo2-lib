@@ -169,7 +169,106 @@ export const environment: Environment = {
           limit: '5'
         }
       }
+    },
+    introOptions :{
+   
+      skipLabel: "<h3 style='color:blue'>Fermer </h3>",
+      nextLabel: "<h3 style='color:blue'>Suivant</h3>",
+      prevLabel: "",
+      doneLabel: "Terminer",
+      hidePrev: true,
+      hideNext: true,
+      positionPrecedence: ["right", "bottom", "top", "left"],
+
+      keyboardNavigation: true,
+      showStepNumbers: false,
+      showBullets: true,
+      showProgress: false,
+      showButtons: true,
+      disableInteraction: true,
+      exitOnOverlayClick: false,
+      helperElementPadding: 2,
+      scrollToElement:true,
+      scrollTo: "element",
+      scrollPadding: 200,
+      // overlayOpacity: 0.8,
+
+      highlightClass:"igo-introjs-helperLayer",
+      // buttonClass:"mat-raised-button",
+      tooltipClass:"mat-h2",
+
+      steps: [
+        
+        {
+          no: 0,
+          element: "igo-logo",
+          intro: "igo-logo  (ex. class)",
+          position: "bottom",
+        },
+        {
+          no: 1,
+          element: "igo-title",
+          intro: "igo-title (ex. Id)",
+          position: "bottom",
+        },
+
+        {
+          no: 2,
+          element: 'aucun',
+          action: "clickOnTool32",
+          // element: document.getElementsByClassName('mat-list-item')[32].click(),
+          intro: "CLICK on context <br> <strong> step config -> action: 'clickOnTool32'</strong>",
+          position: "bottom",
+        },
+        {
+          no: 3,
+          element: "igo-panel-title",
+          intro: "igo-panel-title",
+          position: "bottom",
+        },
+           
+        {
+          no: 5,
+          element: "igo-map-browser",
+          intro: "igo-map-browser",
+          position: "bottom",
+        },
+        {
+          no: 6,
+          element: "igo-list",
+          intro: "igo-list",
+        },
+        {
+          no: 7,
+          element: "igo-context-item:nth-child(3)",
+          intro: "igo-context-item:nth-child(3)<br>NB: pour la mise en surbrillance l'index pour nth-child debute a 1 donc index 3= 3e contexte de la liste",
+          position: "bottom",
+        },
+        {
+          no: 11,
+          element: "aucun",
+          intro: "Click on context index 2 <br> step config -> action: 'clickOnContext2' <br> NB: Ici l'index de la liste de contexte débute a 0, donc clickOnContext2 = click sur le 3e context ",
+          action: "clickOnContext2"
+        },
+        {
+          no: 11,
+          element: "igo-layer-list",
+          intro: "igo-layer-list",
+        },
+        {
+          no: 11,
+          element: "igo-layer-item:nth-child(2)",
+          intro: "igo-layer-item:nth-child(2) <br> NB: pour la mise en surbrillance l'index pour nth-child debute a 0 <strong> DANS CE CAS-CI le filtre de couche est présent</strong> et ce dernier prend le 1er index donc pour sélectionner le 1er layer de la liste on doit indiquer ->igo-layer-item:nth-child(2)",
+        },
+        {
+          no: 11,
+          element: "igo-layer-item:nth-child(2) #eye-button",
+          intro: "eye button",
+        }
+        
+      ]
     }
+
   }
 };
 

@@ -7,9 +7,7 @@ import { InteractiveTourService } from 'packages/common/src/lib/interactive-tour
   styleUrls: ['./home.component.scss']
 })
 export class AppHomeComponent {
-  constructor(
-    private interactiveTourService:InteractiveTourService
-  ){}
+  constructor(private interactiveTourService: InteractiveTourService) {}
 
   startTour(){
     this.interactiveTourService.startTour();

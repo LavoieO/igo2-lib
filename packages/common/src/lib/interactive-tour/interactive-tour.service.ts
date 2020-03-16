@@ -11,7 +11,9 @@ export class InteractiveTourService {
 
   constructor(private configService: ConfigService) {}
 
-  public startTour() {
+  // .configTourForTool('measurer');
+
+  public startTour(tourTool) {
 
     this.introJS.oncomplete( () =>  {
       console.log('fin du tour');
@@ -128,7 +130,11 @@ export class InteractiveTourService {
 
     this.introJS.onafterchange(targetElement => {});
 
-    this.introJS.setOptions(this.configService.getConfig('introOptions'));
+    if (tourTool === 'global') {
+      this.introJS.setOptions(this.configService.getConfig('introOptions'));
+    } else if('measurer') {
+      this.introJS.setOptions(this.configService.getConfig('introOptionsMeasurer'));
+  }
 
     this.introJS.start();
   }

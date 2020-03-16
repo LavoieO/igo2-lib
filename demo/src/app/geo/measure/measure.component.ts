@@ -8,6 +8,7 @@ import {
   FeatureStore,
   FeatureWithMeasure
 } from '@igo2/geo';
+import { InteractiveTourService } from 'packages/common/src/lib/interactive-tour/interactive-tour.service';
 
 @Component({
   selector: 'app-measure',
@@ -36,7 +37,8 @@ export class AppMeasureComponent {
   constructor(
     private languageService: LanguageService,
     private dataSourceService: DataSourceService,
-    private layerService: LayerService
+    private layerService: LayerService,
+    private interactiveTourService:InteractiveTourService
   ) {
     this.dataSourceService
       .createAsyncDataSource({
@@ -51,4 +53,11 @@ export class AppMeasureComponent {
         );
       });
   }
+
+  startTour(){
+
+    // this.interactiveTourService.configTourForTool('measurer');
+    this.interactiveTourService.startTour('measurer');
+  }
+
 }

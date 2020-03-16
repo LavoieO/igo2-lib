@@ -7,6 +7,13 @@
     <br>
     See the <a href="https://github.com/infra-geo-ouverte/igo2-lib/tree/master/demo/src/app/geo/measure">code of this example</a>
     <hr>
+    <button 
+      id="tour-button" 
+      mat-raised-button
+      aria-label="test"
+      (click)="startTour()"
+     >Tour interactif outil mesure
+    </button>
   </mat-card-content>
 
   <igo-map-browser [map]="map" [view]="view">

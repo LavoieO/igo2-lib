@@ -170,6 +170,7 @@ export const environment: Environment = {
         }
       }
     },
+
     introOptions : {
       skipLabel: '<h3 style="color:blue">Fermer </h3>',
       nextLabel: '<h3 style="color:blue">Suivant</h3>',
@@ -191,8 +192,6 @@ export const environment: Environment = {
       scrollTo: 'element',
       scrollPadding: 200,
       // overlayOpacity: 0.8,
-
-
       highlightClass: 'igo-introjs-helperLayer',
       // buttonClass: "mat-raised-button",
       tooltipClass: 'mat-h2',
@@ -263,6 +262,53 @@ export const environment: Environment = {
           element: 'igo-layer-item:nth-child(2) #eye-button',
           intro: 'eye button',
         }
+      ]
+    },
+
+    introOptionsMeasurer : {
+      skipLabel: '<h3 style="color:blue">Fermer </h3>',
+      nextLabel: '<h3 style="color:blue">Suivant</h3>',
+      prevLabel: '',
+      doneLabel: 'Terminer',
+      hidePrev: true,
+      hideNext: true,
+      positionPrecedence: ['right', 'bottom', 'top', 'left'],
+
+      keyboardNavigation: true,
+      showStepNumbers: false,
+      showBullets: true,
+      showProgress: false,
+      showButtons: true,
+      disableInteraction: true,
+      exitOnOverlayClick: false,
+      helperElementPadding: 2,
+      scrollToElement: true,
+      scrollTo: 'element',
+      scrollPadding: 200,
+      highlightClass: 'igo-introjs-helperLayer',
+      tooltipClass: 'mat-h2',
+
+      steps: [     
+        {
+          no: 0,
+          element: 'mat-button-toggle-button',
+          intro: 'test',
+          position: 'bottom',
+        },
+        {
+          no: 1,
+          element: 'mat-slide-toggle-content',
+          intro: 'test 2',
+          position: 'bottom',
+        },
+
+        {
+          no: 2,
+          element: 'mat-input-element',
+          intro: 'tes3',
+          position: 'bottom',
+        }
+
       ]
     }
   }

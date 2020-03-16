@@ -10,7 +10,7 @@ export class AppHomeComponent {
   constructor(private interactiveTourService: InteractiveTourService) {}
 
   startTour(){
-    this.interactiveTourService.startTour();
+    this.interactiveTourService.startTour('global');
   }
 
 }

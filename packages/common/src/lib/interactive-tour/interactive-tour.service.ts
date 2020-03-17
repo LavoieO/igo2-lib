@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import   { ConfigService} from '@igo2/core';
+import { ConfigService} from '@igo2/core';
 import * as introJs from 'intro.js/intro.js';
 
 @Injectable({
@@ -25,23 +25,23 @@ export class InteractiveTourService {
 
     this.introJS.onbeforechange(targetElement => {
 
-      let tourNo = this.introJS._currentStep;
+      const tourNo: number = this.introJS._currentStep;
       console.log('tourNo');
       console.log(tourNo);
       console.log(targetElement.className );
 
-      // When the element doesn't exist when you start tour 
+      // When the element doesn't exist when you start tour
       // we need to set it when it exist
       if (targetElement.className.indexOf('introjsFloatingElement') !== -1) {
         console.log('target = elem doesnt exist');
 
-        const currentStepConfig = this.configService.getConfig('introOptions').steps[tourNo]
+        const currentStepConfig = this.configService.getConfig('introOptions').steps[tourNo];
         const currentElemConfig = currentStepConfig.element;
         const currentPositionElemConfig = currentStepConfig.position;
 
         let unElem: HTMLElement;
         unElem = document.getElementsByTagName(currentElemConfig)[0] as HTMLElement;
-        
+
         if (!unElem) {
           console.log('elem est vide avec tagName');
           unElem = document.getElementsByClassName(currentElemConfig)[0] as HTMLElement;
@@ -64,7 +64,7 @@ export class InteractiveTourService {
                 this.introJS._introItems[tourNo].element = unElem;
                 this.introJS._introItems[tourNo].position = currentPositionElemConfig;
               }
-              
+
           } else {
               console.log('elem est OK avec ClassName');
               this.introJS._introItems[tourNo].element = unElem;
@@ -75,35 +75,35 @@ export class InteractiveTourService {
           console.log('est OK avec tagName');
           this.introJS._introItems[tourNo].element = unElem;
           this.introJS._introItems[tourNo].position = currentPositionElemConfig;
-        } 
+        }
       }
-    })
+    });
 
-    this.introJS.onchange(targetElement => { 
+    this.introJS.onchange(targetElement => {
 
-      const tourNo = this.introJS._currentStep
-      if (tourNo){
+      const tourNo = this.introJS._currentStep;
+      if (tourNo) {
         // problem with prev Button... if the user back on tour, another click is made and some time that not what you want
         // no solution found but disable prevButton on tour...
         const actionToMake = this.introJS._introItems[tourNo].action;
 
-        if (actionToMake){
+        if (actionToMake) {
           let element: HTMLElement;
 
           if (actionToMake === 'clickOnMenu') {
             // back to initial menu
-              let elemHomeBut: HTMLElement = document.querySelector('#homeButton') as HTMLElement;
+              const elemHomeBut: HTMLElement = document.querySelector('#homeButton') as HTMLElement;
               if (elemHomeBut) {
                 elemHomeBut.click();
               }
 
-              let elemMenuBut: HTMLElement = document.querySelector('#menu-button') as HTMLElement; 
+              const elemMenuBut: HTMLElement = document.querySelector('#menu-button') as HTMLElement;
               elemMenuBut.click();
-          
-          }else if (actionToMake === 'clickOnElem'){
+
+          } else if (actionToMake === 'clickOnElem') {
                 targetElement.click();
 
-          }else if (actionToMake.substring(0,11) === 'clickOnTool'){
+          } else if (actionToMake.substring(0, 11) === 'clickOnTool') {
             const toolIndex = actionToMake.substring(11) ;
             element = document.getElementsByTagName('mat-list-item')[toolIndex] as HTMLElement;
             if (!element) {
@@ -114,25 +114,25 @@ export class InteractiveTourService {
             element.click();
             }
 
-          }else if (actionToMake.substring(0,14) === 'clickOnContext') {
+          } else if (actionToMake.substring(0, 14) === 'clickOnContext') {
             const contextIndex = actionToMake.substring(14) ;
-            element= document.getElementsByTagName('igo-context-item')[contextIndex] as HTMLElement;
+            element = document.getElementsByTagName('igo-context-item')[contextIndex] as HTMLElement;
             element.click();
 
-          }else if (actionToMake.substring(0,12) == 'clickOnLayer') {
+          } else if (actionToMake.substring(0, 12) === 'clickOnLayer') {
             const layerIndex = actionToMake.substring(12) ;
-            element= document.getElementsByClassName('igo-layer-title')[layerIndex] as HTMLElement;
+            element = document.getElementsByClassName('igo-layer-title')[layerIndex] as HTMLElement;
             element.click();
           }
         }
       }
-    })
+    });
 
     this.introJS.onafterchange(targetElement => {});
 
     if (tourTool === 'global') {
       this.introJS.setOptions(this.configService.getConfig('introOptions'));
-    } else if('measurer') {
+    } else if ('measurer') {
       this.introJS.setOptions(this.configService.getConfig('introOptionsMeasurer'));
   }
 

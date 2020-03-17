@@ -9,7 +9,7 @@ import { InteractiveTourService } from 'packages/common/src/lib/interactive-tour
 export class AppHomeComponent {
   constructor(private interactiveTourService: InteractiveTourService) {}
 
-  startTour(){
+  startTour() {
     this.interactiveTourService.startTour('global');
   }
 

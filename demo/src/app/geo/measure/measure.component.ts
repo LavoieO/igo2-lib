@@ -38,7 +38,7 @@ export class AppMeasureComponent {
     private languageService: LanguageService,
     private dataSourceService: DataSourceService,
     private layerService: LayerService,
-    private interactiveTourService:InteractiveTourService
+    private interactiveTourService: InteractiveTourService
   ) {
     this.dataSourceService
       .createAsyncDataSource({
@@ -54,7 +54,7 @@ export class AppMeasureComponent {
       });
   }
 
-  startTour(){
+  startTour() {
 
     // this.interactiveTourService.configTourForTool('measurer');
     this.interactiveTourService.startTour('measurer');

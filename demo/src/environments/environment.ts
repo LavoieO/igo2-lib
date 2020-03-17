@@ -196,7 +196,7 @@ export const environment: Environment = {
       // buttonClass: "mat-raised-button",
       tooltipClass: 'mat-h2',
 
-      steps: [     
+      steps: [
         {
           no: 0,
           element: 'igo-logo',
@@ -223,7 +223,7 @@ export const environment: Environment = {
           element: 'igo-panel-title',
           intro: 'igo-panel-title',
           position: 'bottom',
-        }, 
+        },
         {
           no: 5,
           element: 'igo-map-browser',
@@ -288,7 +288,7 @@ export const environment: Environment = {
       highlightClass: 'igo-introjs-helperLayer',
       tooltipClass: 'mat-h2',
 
-      steps: [     
+      steps: [
         {
           no: 0,
           element: 'mat-button-toggle-button',

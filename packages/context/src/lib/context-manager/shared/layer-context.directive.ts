@@ -14,6 +14,7 @@ import {
 
 import { ContextService } from './context.service';
 import { DetailedContext } from './context.interface';
+import { ObjectUtils } from '@igo2/utils';
 
 @Directive({
   selector: '[igoLayerContext]'
@@ -60,9 +61,34 @@ export class LayerContextDirective implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.context$$.unsubscribe();
+    this.storeLayersIntoSessionStorage();
+  }
+
+  private storeLayersIntoSessionStorage() {
+    const storageLayers = [];
+
+    const contextFromMap = this.contextService.getContextFromMap(this.map);
+    console.log('contextFromMap', contextFromMap);
+
+    this.map.layers$.value.filter(layer => layer.options.sourceOptions !== undefined)
+    .forEach(layer => {
+      const clonedLayer = ObjectUtils.cloneDeep(layer.options);
+      delete clonedLayer.source;
+      clonedLayer.legendOptions = {};
+      clonedLayer.legendOptions.collapsed = layer.legendCollapsed; // marche pas
+      // reste timefilter a gerer...
+      clonedLayer.visible = layer.visible;
+      clonedLayer.opacity = layer.opacity;
+      storageLayers.push(clonedLayer);
+    });
+
+    if (storageLayers.length) {
+      sessionStorage.setItem(this.contextService.previousContext$.value.uri, JSON.stringify(storageLayers));
+    }
   }
 
   private handleContextChange(context: DetailedContext) {
+    this.storeLayersIntoSessionStorage();
     if (context.layers === undefined) { return; }
     if (this.removeLayersOnContextChange === true) {
       this.map.removeAllLayers();

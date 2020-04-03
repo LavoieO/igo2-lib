@@ -164,18 +164,21 @@ export class TimeFilterFormComponent implements OnInit {
     this.checkFilterValue();
     if (this.options.enabled) {
       if (!this.isRange && this.style === 'slider' && this.type === 'year') {
+        this.storeCurrentFilterValue(this.year);
         this.yearChange.emit(this.year);
       }
     } else {
-      this.storeCurrentFilterValue();
+      this.storeCurrentFilterValue(this.year);
       this.yearChange.emit(undefined); // TODO: FIX THIS for ALL OTHER TYPES STYLES OR RANGE.
     }
   }
 
-  storeCurrentFilterValue() {
+  storeCurrentFilterValue(value: any | [any, any]) {
     // TODO: FIX THIS for ALL OTHER TYPES STYLES OR RANGE.
-    if (!this.isRange && this.style === TimeFilterStyle.SLIDER && this.type === TimeFilterType.YEAR) {
-        this.options.value = this.year.toString();
+    if (Array.isArray(value)) {
+      this.options.value = value.join('/');
+    } else {
+      this.options.value = value.toString();
     }
   }
 
@@ -200,8 +203,10 @@ export class TimeFilterFormComponent implements OnInit {
 
     // Only if is range, use 2 dates to make the range
     if (this.isRange) {
+      this.storeCurrentFilterValue([this.startDate, this.endDate]);
       this.change.emit([this.startDate, this.endDate]);
     } else {
+      this.storeCurrentFilterValue(this.startDate);
       this.change.emit(this.startDate);
     }
   }
@@ -216,8 +221,12 @@ export class TimeFilterFormComponent implements OnInit {
       for (let i = this.initStartYear + 1; i < this.endYear; i++) {
         this.startListYears.push(i);
       }
+      // this.options.value = [this.startYear, this.endYear].join('/');
+      this.storeCurrentFilterValue([this.startYear, this.endYear]);
       this.yearChange.emit([this.startYear, this.endYear]);
     } else {
+      this.options.value = this.year;
+      this.storeCurrentFilterValue(this.year);
       this.yearChange.emit(this.year);
     }
   }
@@ -227,6 +236,7 @@ export class TimeFilterFormComponent implements OnInit {
   }
 
   handleListYearStartChange(event: any) {
+    this.storeCurrentFilterValue([this.startDate, this.endDate]);
     this.change.emit([this.startDate, this.endDate]);
   }
 
@@ -270,11 +280,12 @@ export class TimeFilterFormComponent implements OnInit {
 
     if (this.options.enabled) {
       if (!this.isRange && TimeFilterStyle.SLIDER && this.type === TimeFilterType.YEAR) {
+        this.storeCurrentFilterValue(this.year);
         this.yearChange.emit(this.year);
       }
     } else {
       this.stopFilter();
-      this.storeCurrentFilterValue();
+      this.storeCurrentFilterValue(this.year);
       this.change.emit(undefined); // TODO: FIX THIS for ALL OTHER TYPES STYLES OR RANGE.
     }
   }
@@ -283,6 +294,7 @@ export class TimeFilterFormComponent implements OnInit {
     this.date = new Date(this.min);
     this.year = this.date.getFullYear() + 1;
     if (!this.isRange && TimeFilterStyle.SLIDER && this.type === TimeFilterType.YEAR) {
+      this.storeCurrentFilterValue(this.year);
       this.yearChange.emit(this.year);
     } else {
       this.setupDateOutput();
@@ -333,6 +345,7 @@ export class TimeFilterFormComponent implements OnInit {
           if (that.year > that.max.getFullYear()) {
             that.stopFilter();
           }
+          this.storeCurrentFilterValue(this.year);
           that.yearChange.emit(that.year);
         },
         this.timeInterval,
@@ -357,6 +370,7 @@ export class TimeFilterFormComponent implements OnInit {
 
   handleSliderYearChange(event: any) {
     this.year = event.value;
+    this.storeCurrentFilterValue(this.year);
     this.yearChange.emit(this.year);
   }
 

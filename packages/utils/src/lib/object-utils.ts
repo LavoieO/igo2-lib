@@ -1,3 +1,5 @@
+import { cloneDeep } from 'lodash';
+
 export class ObjectUtils {
   static resolve(obj: object, key: string): any {
     const keysArray = key
@@ -66,6 +68,10 @@ export class ObjectUtils {
       }
     }
     return target;
+  }
+
+  static cloneDeep(src): any {
+    return cloneDeep(src);
   }
 
   static removeDuplicateCaseInsensitive(obj: object) {

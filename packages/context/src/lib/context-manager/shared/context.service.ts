@@ -34,6 +34,7 @@ import {
   providedIn: 'root'
 })
 export class ContextService {
+  public previousContext$ = new BehaviorSubject<DetailedContext>(undefined);
   public context$ = new BehaviorSubject<DetailedContext>(undefined);
   public contexts$ = new BehaviorSubject<ContextsList>({ ours: [] });
   public defaultContextId$ = new BehaviorSubject<string>(undefined);
@@ -222,7 +223,15 @@ export class ContextService {
     const url = this.getPath(`${uri}.json`);
     return this.http.get<DetailedContext>(url).pipe(
       flatMap(res => {
+        let sessionsLayers = JSON.parse(sessionStorage.getItem(res.uri));
+        if (sessionsLayers) {
+          sessionsLayers = sessionsLayers.reverse();
+        }
+
         if (!res.base) {
+          if (sessionsLayers) {
+            res.layers = sessionsLayers;
+          }
           return of(res);
         }
         const urlBase = this.getPath(`${res.base}.json`);
@@ -230,7 +239,8 @@ export class ContextService {
           map((resBase: DetailedContext) => {
             const resMerge = res;
             resMerge.map = ObjectUtils.mergeDeep(resBase.map, res.map);
-            resMerge.layers = (resBase.layers || [])
+            resMerge.layers = sessionsLayers ? sessionsLayers :
+            (resBase.layers || [])
               .concat(res.layers || [])
               .reverse()
               .filter(
@@ -325,6 +335,7 @@ export class ContextService {
   setContext(context: DetailedContext) {
     this.handleContextMessage(context);
     const currentContext = this.context$.value;
+    this.previousContext$.next(currentContext);
     if (currentContext && context && context.id === currentContext.id) {
       if (context.map.view.keepCurrentView === undefined) {
         context.map.view.keepCurrentView = true;

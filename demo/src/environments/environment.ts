@@ -291,20 +291,20 @@ export const environment: Environment = {
       steps: [
         {
           no: 0,
-          element: 'mat-button-toggle-button',
+          element: 'mat-button-toggle-1-button',
           intro: 'test',
           position: 'bottom',
         },
         {
           no: 1,
-          element: 'mat-slide-toggle-content',
+          element: 'div.mat-button-toggle-ripple',
           intro: 'test 2',
           position: 'bottom',
         },
 
         {
           no: 2,
-          element: 'mat-input-element',
+          element: 'span.mat-slide-toggle-content',
           intro: 'tes3',
           position: 'bottom',
         }

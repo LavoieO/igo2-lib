@@ -197,6 +197,10 @@ export abstract class Layer {
    * @internal
    */
   private transferProperties(layerChange) {
+    // TODO ENLEVER bidirectional?
+    // TODO Sourcefields
+    // Synced delete layer.
+
     if (layerChange.target.getProperties().id === 'searchPointerSummaryId') {
       return;
     }
@@ -259,6 +263,7 @@ export abstract class Layer {
         const processTimeFilter = linkedProperties.indexOf('timeFilter') !== -1;
 
         if (processOgcFilters) {
+          // TODO CHECK pourquoi c'est bi-directionnel, pour les pushbuttons? voulou? non
           const ogcFiltersToAssing = ObjectUtils.copyDeep(layerChangeValues.sourceOptions.ogcFilters);
           (dstLayer.options.source.options as any).ogcFilters = ogcFiltersToAssing;
           if (dstLayer.options.sourceOptions.type === 'wfs') {

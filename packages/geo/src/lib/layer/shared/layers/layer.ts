@@ -5,20 +5,23 @@ import {
   Subscription,
   combineLatest
 } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, first } from 'rxjs/operators';
 
 import olLayer from 'ol/layer/Layer';
 
 import { AuthInterceptor } from '@igo2/auth';
-import { SubjectStatus } from '@igo2/utils';
+import { SubjectStatus, ObjectUtils } from '@igo2/utils';
 
-import { DataSource, Legend } from '../../../datasource';
+import { DataSource, Legend, WMSDataSource } from '../../../datasource';
 import { IgoMap } from '../../../map/shared/map';
 import { getResolutionFromScale } from '../../../map/shared/map.utils';
 
-import { LayerOptions } from './layer.interface';
+import { LayerOptions, LayersLink, ComputedLink } from './layer.interface';
+import { TimeFilterableDataSourceOptions } from '../../../filter/shared/time-filter.interface';
+import { MapService } from '../../../map/shared/map.service';
 
 export abstract class Layer {
+
   public collapsed: boolean;
   public dataSource: DataSource;
   public legend: Legend[];
@@ -59,11 +62,12 @@ export abstract class Layer {
   }
 
   get opacity(): number {
-    return this.ol.get('opacity');
+    return this.opacity$.value;
   }
 
   set opacity(opacity: number) {
     this.ol.setOpacity(opacity);
+    this.opacity$.next(opacity);
   }
 
   set isInResolutionsRange(value: boolean) {
@@ -100,6 +104,7 @@ export abstract class Layer {
     return this.visible$.value;
   }
   readonly visible$: BehaviorSubject<boolean> = new BehaviorSubject(undefined);
+  readonly opacity$: BehaviorSubject<number> = new BehaviorSubject(undefined);
 
   get displayed(): boolean {
     return this.visible && this.isInResolutionsRange;
@@ -115,7 +120,8 @@ export abstract class Layer {
 
   constructor(
     public options: LayerOptions,
-    protected authInterceptor?: AuthInterceptor
+    protected authInterceptor?: AuthInterceptor,
+    private mapService?: MapService
   ) {
     this.dataSource = options.source;
 
@@ -146,7 +152,6 @@ export abstract class Layer {
         ? options.legendOptions.collapsed
         : true
       : true;
-
     this.ol.set('_layer', this, true);
   }
 
@@ -158,7 +163,147 @@ export abstract class Layer {
     this.unobserveResolution();
     if (igoMap !== undefined) {
       this.observeResolution();
+      this.observePropertiesChange();
+      this.map.status$
+        .pipe(first())
+        .subscribe(() => {
+          this.ol.dispatchEvent({ type: 'change' });
+          this.ol.dispatchEvent({ type: 'propertychange' });
+
+          const computedLinks = [];
+          this.map.layers
+            .filter(layer => layer.options.linkedLayers && layer.options.linkedLayers.links)
+            .map(layer => {
+              const srcId = layer.options.linkedLayers.linkId;
+              layer.options.linkedLayers.links.map(link => {
+                const bidirectionnal = link.bidirectionnal !== undefined ? link.bidirectionnal : true;
+                link.linkedIds.map(linkedId => {
+                  computedLinks.push({ srcId, dstId: linkedId, properties: link.properties, bidirectionnal } as ComputedLink);
+                });
+              });
+            });
+
+          if (this.options.linkedLayers && this.options.linkedLayers.linkId) {
+            const linkId = this.options.linkedLayers.linkId;
+            this.options.linkedLayers.computedLinks =
+              computedLinks.filter(computedLink => computedLink.srcId === linkId || computedLink.dstId === linkId);
+          }
+        });
     }
+  }
+
+  /**
+   * Transfering properties between various layers.
+   * @internal
+   */
+  private transferProperties(layerChange) {
+    if (layerChange.target.getProperties().id === 'searchPointerSummaryId') {
+      return;
+    }
+    const linkedLayers = layerChange.target.getProperties().linkedLayers as LayersLink;
+    if (!linkedLayers) {
+      return;
+    }
+    const computedLinks = linkedLayers.computedLinks;
+    if (!computedLinks) {
+      return;
+    }
+    const currentLinkedId = linkedLayers.linkId;
+    computedLinks.map(computedLink => {
+      const linkedProperties = computedLink.properties;
+      const srcLayerId = computedLink.srcId;
+      const dstLayerId = computedLink.dstId;
+      const srcLayer = this.map.layers.find(layer => layer.options.linkedLayers && layer.options.linkedLayers.linkId === srcLayerId);
+      const dstLayer = this.map.layers.find(layer => layer.options.linkedLayers && layer.options.linkedLayers.linkId === dstLayerId);
+      if (!srcLayer || !dstLayer) {
+        return;
+      }
+      if (!computedLink.bidirectionnal && currentLinkedId !== srcLayerId) {
+        return;
+      }
+      if (layerChange.type === 'propertychange') {
+        const key = layerChange.key;
+        const newValue = layerChange.target.getProperties()[key];
+
+        if (!linkedProperties || linkedProperties.indexOf(key) === -1) {
+          return;
+        }
+
+        switch (computedLink.bidirectionnal) {
+          case false:
+            dstLayer[key] = newValue;
+            break;
+          case true:
+          default:
+            dstLayer[key] = newValue;
+            srcLayer[key] = newValue;
+            break;
+        }
+
+        if (key === 'visible') {
+          this.visible = newValue;
+        }
+        if (key === 'opacity') {
+          this.opacity = newValue;
+        }
+        // if (key === 'zIndex') {
+        //   this.zIndex = newValue;
+        // TODO
+        // }
+      }
+
+      if (layerChange.type === 'change') {
+        const layerChangeValues = layerChange.target.values_;
+
+        const processOgcFilters = linkedProperties.indexOf('ogcFilters') !== -1;
+        const processTimeFilter = linkedProperties.indexOf('timeFilter') !== -1;
+
+        if (processOgcFilters) {
+          const ogcFiltersToAssing = ObjectUtils.copyDeep(layerChangeValues.sourceOptions.ogcFilters);
+          (dstLayer.options.source.options as any).ogcFilters = ogcFiltersToAssing;
+          if (dstLayer.options.sourceOptions.type === 'wfs') {
+            dstLayer.ol.getSource().clear();
+          }
+          if (dstLayer.options.sourceOptions.type === 'wms') {
+            const appliedOgcFilter = layerChangeValues.sourceOptions.params.FILTER;
+            (dstLayer.dataSource as WMSDataSource).ol.updateParams({ FILTER: appliedOgcFilter });
+          }
+          if (computedLink.bidirectionnal) {
+            (srcLayer.options.source.options as any).ogcFilters = ogcFiltersToAssing;
+            if (srcLayer.options.sourceOptions.type === 'wfs') {
+              srcLayer.ol.getSource().clear();
+            }
+            if (srcLayer.options.sourceOptions.type === 'wms') {
+              const appliedOgcFilter = layerChangeValues.sourceOptions.params.FILTER;
+              (srcLayer.dataSource as WMSDataSource).ol.updateParams({ FILTER: appliedOgcFilter });
+            }
+          }
+        }
+        if (processTimeFilter) {
+          const timeFilterToAssing = layerChangeValues.sourceOptions.timeFilter;
+          if (dstLayer.options.sourceOptions.type === 'wms') {
+            (dstLayer.options.source.options as TimeFilterableDataSourceOptions).timeFilter = timeFilterToAssing;
+            (dstLayer.dataSource as WMSDataSource).ol.updateParams({ TIME: layerChangeValues.source.params_.TIME });
+          }
+          if (computedLink.bidirectionnal && srcLayer.options.sourceOptions.type === 'wms') {
+            (srcLayer.options.source.options as TimeFilterableDataSourceOptions).timeFilter = timeFilterToAssing;
+            (srcLayer.dataSource as WMSDataSource).ol.updateParams({ TIME: layerChangeValues.source.params_.TIME });
+          }
+        }
+      }
+    });
+  }
+
+  private observePropertiesChange() {
+    if (!this.map) {
+      return;
+    }
+    this.ol.on('propertychange', evt => {
+      this.transferProperties(evt);
+    });
+    this.ol.on('change', evt => {
+      this.transferProperties(evt);
+    });
   }
 
   private observeResolution() {

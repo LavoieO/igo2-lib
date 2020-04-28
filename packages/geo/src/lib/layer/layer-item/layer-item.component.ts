@@ -56,6 +56,7 @@ export class LayerItemComponent implements OnInit, OnDestroy {
   }
   set opacity(opacity: number) {
     this.layer.opacity = opacity / 100;
+    // TODO Need to manage it. tu update the layer-item if trigger programatically
   }
 
   constructor(private networkService: NetworkService) {}
